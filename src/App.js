@@ -4,6 +4,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import axios from 'axios';
 import './App.css';
+import FileUpload from './FileUpload'
 
 // Manually set the workerSrc property for pdfjsLib to a specific version
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
@@ -14,14 +15,15 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (uploadedFiles) => {
+    const file = uploadedFiles[0];
     if (file) {
       const fileUrl = URL.createObjectURL(file);
       setPdfFile(fileUrl);
       extractTextFromPdf(fileUrl);
     }
   };
+  
 
   const extractTextFromPdf = async (url) => {
     const pdf = await getDocument(url).promise;
@@ -63,8 +65,8 @@ function App() {
     <div className="App">
       {!pdfFile ? (
         <div className="upload-container">
-          <h1>Upload a PDF</h1>
-          <input type="file" accept="application/pdf" onChange={handleFileChange} />
+          <h1 className='font-bold text-2xl'>Chat with PDF</h1>
+          <FileUpload onChange={handleFileChange} />
         </div>
       ) : (
         <div className="viewer-container">
@@ -80,14 +82,19 @@ function App() {
               ))}
             </div>
             <div className="chat-input">
-              <input 
-                type="text" 
-                value={inputMessage} 
-                onChange={(e) => setInputMessage(e.target.value)} 
-                placeholder="Type a message..." 
-              />
-              <button onClick={handleSendMessage}>Send</button>
-            </div>
+  <input 
+    type="text" 
+    value={inputMessage} 
+    onChange={(e) => setInputMessage(e.target.value)} 
+    placeholder="Type a message..." 
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') {
+        handleSendMessage();
+      }
+    }} 
+  />
+  <button onClick={handleSendMessage}>Send</button>
+</div>
           </div>
         </div>
       )}
